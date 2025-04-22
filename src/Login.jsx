@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import axios from 'axios';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebase';
 
 function Login() {
   const [email, setEmail] = useState('');
@@ -7,20 +8,22 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/login`, { email, password });
-      alert(res.data.message);
-    } catch (err) {
-      alert('Login failed');
+      // Sign in user with Firebase Auth
+      await signInWithEmailAndPassword(auth, email, password);
+      alert('Login successful!');
+    } catch (error) {
+      console.error(error);
+      alert('Login failed: ' + error.message);
     }
   };
 
   return (
     <form onSubmit={handleSubmit} style={{ textAlign: 'center' }}>
-      {/* Stack inputs vertically */}
       <div style={{
         display: 'flex',
-        flexDirection: 'column', // vertical layout
+        flexDirection: 'column',
         gap: '15px',
         maxWidth: '300px',
         margin: '0 auto',

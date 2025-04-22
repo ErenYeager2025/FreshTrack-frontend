@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import axios from 'axios';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
+import { auth, db } from '../firebase';
 
 function Register() {
   const [email, setEmail] = useState('');
@@ -7,17 +9,27 @@ function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/register`, { email, password });
-      alert(res.data.message);
-    } catch (err) {
-      alert('Registration failed');
+      // Register user with Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Save user data in Firestore
+      await setDoc(doc(db, 'users', user.uid), {
+        email: user.email,
+        createdAt: new Date()
+      });
+
+      alert('Registration successful!');
+    } catch (error) {
+      console.error(error);
+      alert('Registration failed: ' + error.message);
     }
   };
 
   return (
     <form onSubmit={handleSubmit} style={{ textAlign: 'center' }}>
-      {/* Vertical layout */}
       <div style={{
         display: 'flex',
         flexDirection: 'column',
