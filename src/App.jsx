@@ -4,6 +4,7 @@ import './App.css'; // Importing your CSS file for styling
 
 import Login from './Login'; // Importing your Login component
 import Register from './Register'; // Importing your Register component
+import FoodList from './components/FoodList'; // ✅ import your new component
 
 
 function App() {
@@ -32,6 +33,7 @@ function App() {
           {isLogin ? 'Register' : 'Login'}
         </button>
       </p>
+      <FoodList /> {/* ✅ add the component here so it's visible */}
     </div>
   );
 }

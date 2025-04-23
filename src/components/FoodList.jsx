@@ -1,48 +1,45 @@
 // src/components/FoodList.jsx
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../firebase'; // adjust path if needed
+import { db } from '../firebase'; // Make sure you import db from firebase.js
 
 function FoodList() {
-  const [foodItems, setFoodItems] = useState([]);
+  const [foods, setFoods] = useState([]);
 
+  // useEffect runs code when the component loads
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, 'foods')); // 'foods' is your collection name
+        const querySnapshot = await getDocs(collection(db, 'foods'));
         const items = querySnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
         }));
-        setFoodItems(items);
+        setFoods(items); // Save fetched data into state
       } catch (error) {
-        console.error("Error fetching food items: ", error);
+        console.error('Error fetching food data:', error);
       }
     };
 
     fetchData();
-  }, []);
+  }, []); // Empty array = run once when component mounts
 
   return (
-    <div style={{ padding: '1rem' }}>
+    <div>
       <h2>Food List</h2>
-      <ul>
-        {foodItems.map(item => (
-          <li key={item.id}>
-            {item.name} - Expiry: {item.expiry}
-          </li>
-        ))}
-      </ul>
+      {foods.length === 0 ? (
+        <p>No food items yet.</p>
+      ) : (
+        <ul>
+          {foods.map(food => (
+            <li key={food.id}>
+              <strong>{food.name}</strong> — Expiry: {food.expiry}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
 
 export default FoodList;
-
-// useEffect: Runs the data fetching when the component loads.
-
-// getDocs(): Reads all documents from the 'foods' collection in Firestore.
-
-// collection(db, 'foods'): Points to your Firestore collection.
-
-// setFoodItems(): Updates the local state with the food items.
