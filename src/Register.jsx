@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
-import { auth, db } from './firebase'; // ✅ this is correct now
+import { auth, db } from './firebase';
 // firebaseConfig.js: only has Firebase keys/settings.
 // firebase.js: uses the config to initialize Firebase + gives you auth and db.
 function Register() {

@@ -1,16 +1,20 @@
-// src/firebase.js
+// firebaseConfig.js
+import { initializeApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
 
-import { initializeApp } from 'firebase/app'; // This starts your Firebase app
-import { getAuth } from 'firebase/auth';      // This gives access to Authentication
-import { getFirestore } from 'firebase/firestore'; // This gives access to Firestore DB
-import firebaseConfig from './firebaseConfig'; // Your Firebase keys/settings
+const firebaseConfig = {
+  apiKey: "AIzaSyAxZ-CMJtD9DmyEDXoTx0AUpw7dqXVb7lc",
+  authDomain: "freshtrack-1a8bb.firebaseapp.com",
+  projectId: "freshtrack-1a8bb",
+  storageBucket: "freshtrack-1a8bb.firebasestorage.app",
+  messagingSenderId: "353789922461",
+  appId: "1:353789922461:web:9882ab100e9e08b5265874",
+  measurementId: "G-S8CHT3VCG7"
+};
 
-// Initialize Firebase app using your config values
 const app = initializeApp(firebaseConfig);
-
-// Create Auth and DB services
 const auth = getAuth(app);
-const db = getFirestore(app);
+const db = getFirestore(app); // 🔥 Firestore Database
 
-// Export so you can use them in other files (like Login/Register/FoodList)
 export { auth, db };
