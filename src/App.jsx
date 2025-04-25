@@ -16,11 +16,29 @@ function App() {
 
   // Listen for login/logout changes
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser); // set the user if logged in, or null if logged out
+    if (!user?.uid) {
+      console.log("No user UID available.");
+      return;
+    }
+
+    console.log('📦 Listening for food items for UID:', user.uid);
+
+    const q = query(
+      collection(db, 'foods'),
+      where('userId', '==', user.uid)
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const list = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      console.log('✅ Real-time food list from Firestore:', list);
+      setFoods(list);
     });
-    return () => unsubscribe(); // stop listening on unmount
-  }, []);
+
+    return () => unsubscribe();
+  }, [user]);
 
   // Logout function
   const handleLogout = async () => {
