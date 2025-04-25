@@ -17,6 +17,8 @@ function FoodList({ user }) {
   useEffect(() => {
     if (!user?.uid) return;
 
+    console.log('📦 Listening for food items for UID:', user.uid);
+
     const q = query(
       collection(db, 'foods'),
       where('userId', '==', user.uid)
@@ -27,12 +29,12 @@ function FoodList({ user }) {
         id: doc.id,
         ...doc.data()
       }));
+      console.log('✅ Real-time food list from Firestore:', list);
       setFoods(list);
-      console.log('✅ Loaded foods from Firestore:', list); // 🔍 Debug
     });
 
-    return () => unsubscribe(); // Clean up when component unmounts
-  }, [user]);
+    return () => unsubscribe();
+  }, [user?.uid]); // ✅ make sure this triggers when user ID is ready
 
   // 🧾 Add new food item
   const handleSubmit = async (e) => {
