@@ -16,9 +16,15 @@ function App() {
 
   // Listen for login/logout changes
   useEffect(() => {
-    if (!user?.uid) {
-      console.log("No user UID available.");
-      return;
+    if (user?.uid) {
+      return (
+        <div style={{ textAlign: 'center', marginTop: '50px' }}>
+          <h1>FreshTrack</h1>
+          <p>Welcome, {user.email}</p>
+          <button onClick={handleLogout} style={{ marginBottom: '20px' }}>Logout</button>
+          {user?.uid && <FoodList user={user} />}  {/* ✅ Safe check here */}
+        </div>
+      );
     }
 
     console.log('📦 Listening for food items for UID:', user.uid);
@@ -52,7 +58,7 @@ function App() {
         <h1>FreshTrack</h1>
         <p>Welcome, {user.email}</p>
         <button onClick={handleLogout} style={{ marginBottom: '20px' }}>Logout</button>
-        <FoodList user={user} />
+        {user?.uid && <FoodList user={user} />}
       </div>
     );
   }
