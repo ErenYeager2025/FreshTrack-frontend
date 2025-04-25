@@ -5,7 +5,7 @@ import {
   addDoc,
   query,
   where,
-  getDocs
+  onSnapshot
 } from 'firebase/firestore';
 
 function FoodList({ user }) {
@@ -13,29 +13,27 @@ function FoodList({ user }) {
   const [expiry, setExpiry] = useState('');
   const [foods, setFoods] = useState([]);
 
-  // Fetch only the current user's food items
-  const fetchFoods = async () => {
-    try {
-      const q = query(
-        collection(db, 'foods'),
-        where('userId', '==', user.uid) // only get foods added by this user
-      );
-      const snapshot = await getDocs(q);
-      const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setFoods(list);
-    } catch (err) {
-      console.error('Error fetching foods:', err);
-    }
-  };
-
-  // Run once when component mounts or user changes
+  // Real-time fetch of user’s food items
   useEffect(() => {
-    if (user?.uid) {
-      fetchFoods();
-    }
+    if (!user?.uid) return;
+
+    const q = query(
+      collection(db, 'foods'),
+      where('userId', '==', user.uid)
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const list = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setFoods(list);
+    });
+
+    // Cleanup when component unmounts
+    return () => unsubscribe();
   }, [user]);
 
-  // Add new food item with userId
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name || !expiry) return alert("Please enter name and expiry date");
@@ -45,11 +43,10 @@ function FoodList({ user }) {
         name,
         expiry,
         createdAt: new Date(),
-        userId: user.uid // ✅ save who owns this food item
+        userId: user.uid
       });
       setName('');
       setExpiry('');
-      fetchFoods(); // Refresh list
     } catch (err) {
       console.error('Error adding food:', err);
       alert('Failed to add food');
