@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import './App.css';
 
-import { auth } from './firebase'; // Firebase Auth
+import { auth } from './firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 
 import Login from './Login';
@@ -11,59 +11,34 @@ import Register from './Register';
 import FoodList from './components/FoodList';
 
 function App() {
-  const [isLogin, setIsLogin] = useState(true); // toggles Login/Register view
-  const [user, setUser] = useState(null); // store current user
+  const [isLogin, setIsLogin] = useState(true);
+  const [user, setUser] = useState(null);
 
-  // Listen for login/logout changes
+  // Listen for Firebase login/logout changes
   useEffect(() => {
-    if (user?.uid) {
-      return (
-        <div style={{ textAlign: 'center', marginTop: '50px' }}>
-          <h1>FreshTrack</h1>
-          <p>Welcome, {user.email}</p>
-          <button onClick={handleLogout} style={{ marginBottom: '20px' }}>Logout</button>
-          {user?.uid && <FoodList user={user} />}  {/* ✅ Safe check here */}
-        </div>
-      );
-    }
-
-    console.log('📦 Listening for food items for UID:', user.uid);
-
-    const q = query(
-      collection(db, 'foods'),
-      where('userId', '==', user.uid)
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const list = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      console.log('✅ Real-time food list from Firestore:', list);
-      setFoods(list);
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser); // set logged in user or null
     });
+    return () => unsubscribe(); // clean up listener
+  }, []);
 
-    return () => unsubscribe();
-  }, [user]);
-
-  // Logout function
   const handleLogout = async () => {
     await signOut(auth);
   };
 
-  // If user is logged in, show dashboard
-  if (user) {
+  // ✅ Logged in view
+  if (user?.uid) {
     return (
       <div style={{ textAlign: 'center', marginTop: '50px' }}>
         <h1>FreshTrack</h1>
         <p>Welcome, {user.email}</p>
         <button onClick={handleLogout} style={{ marginBottom: '20px' }}>Logout</button>
-        {user?.uid && <FoodList user={user} />}
+        <FoodList user={user} /> {/* Pass user with UID */}
       </div>
     );
   }
 
-  // If no user logged in, show login/register
+  // 🚪 Not logged in → show Login or Register
   return (
     <div style={{ textAlign: 'center', marginTop: '50px' }}>
       <h1>FreshTrack</h1>

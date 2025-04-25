@@ -13,7 +13,7 @@ function FoodList({ user }) {
   const [expiry, setExpiry] = useState('');
   const [foods, setFoods] = useState([]);
 
-  // Real-time fetch of user’s food items
+  // ✅ Listen for real-time updates to foods belonging to the current user
   useEffect(() => {
     if (!user?.uid) return;
 
@@ -28,15 +28,19 @@ function FoodList({ user }) {
         ...doc.data()
       }));
       setFoods(list);
+      console.log('✅ Loaded foods from Firestore:', list); // 🔍 Debug
     });
 
-    // Cleanup when component unmounts
-    return () => unsubscribe();
+    return () => unsubscribe(); // Clean up when component unmounts
   }, [user]);
 
+  // 🧾 Add new food item
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!name || !expiry) return alert("Please enter name and expiry date");
+    if (!name || !expiry) {
+      alert('Please enter name and expiry date');
+      return;
+    }
 
     try {
       await addDoc(collection(db, 'foods'), {
@@ -48,7 +52,7 @@ function FoodList({ user }) {
       setName('');
       setExpiry('');
     } catch (err) {
-      console.error('Error adding food:', err);
+      console.error('❌ Error adding food:', err);
       alert('Failed to add food');
     }
   };
