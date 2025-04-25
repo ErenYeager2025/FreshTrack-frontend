@@ -1,28 +1,53 @@
-// 1. Import React features
-import { useState } from 'react'; // useState is a special function for tracking changes in your UI
-import './App.css'; // Importing your CSS file for styling
+// App.jsx
 
-import Login from './Login'; // Importing your Login component
-import Register from './Register'; // Importing your Register component
-import FoodList from './components/FoodList'; // ✅ import your new component
+import { useState, useEffect } from 'react';
+import './App.css';
 
+import { auth } from './firebase'; // Firebase Auth
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+
+import Login from './Login';
+import Register from './Register';
+import FoodList from './components/FoodList';
 
 function App() {
-  // 2. useState to remember if user is on Login or Register screen
-  const [isLogin, setIsLogin] = useState(true);
-  // This means: isLogin = true by default, which means it shows Login form first
+  const [isLogin, setIsLogin] = useState(true); // toggles Login/Register view
+  const [user, setUser] = useState(null); // store current user
 
+  // Listen for login/logout changes
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser); // set the user if logged in, or null if logged out
+    });
+    return () => unsubscribe(); // stop listening on unmount
+  }, []);
 
+  // Logout function
+  const handleLogout = async () => {
+    await signOut(auth);
+  };
+
+  // If user is logged in, show dashboard
+  if (user) {
+    return (
+      <div style={{ textAlign: 'center', marginTop: '50px' }}>
+        <h1>FreshTrack</h1>
+        <p>Welcome, {user.email}</p>
+        <button onClick={handleLogout} style={{ marginBottom: '20px' }}>Logout</button>
+        <FoodList user={user} />
+      </div>
+    );
+  }
+
+  // If no user logged in, show login/register
   return (
     <div style={{ textAlign: 'center', marginTop: '50px' }}>
       <h1>FreshTrack</h1>
-      {/*3. Show either Login or Register form depending on isLogin value */}
       {isLogin ? <Login /> : <Register />}
-      {/* 4. Button to switch between login and register */}
       <p>
         {isLogin ? "Don't have an account?" : "Already have an account?"}
         <button
-          onClick={() => setIsLogin(!isLogin)}// Click to switch forms
+          onClick={() => setIsLogin(!isLogin)}
           style={{
             marginLeft: '10px',
             padding: '5px 10px',
@@ -33,9 +58,8 @@ function App() {
           {isLogin ? 'Register' : 'Login'}
         </button>
       </p>
-      <FoodList /> {/* ✅ add the component here so it's visible */}
     </div>
   );
 }
 
-export default App;// Export the component so React can use it
+export default App;
